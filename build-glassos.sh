@@ -11,6 +11,7 @@ case "$ARCH" in
 esac
 apt-get update
 apt-get install -y live-build debootstrap squashfs-tools xorriso mtools dosfstools grub-efi-"$ARCH"-bin
+if [ "$ARCH" = amd64 ]; then apt-get install -y syslinux syslinux-common syslinux-utils isolinux; fi
 
 WORK=/opt/chenos-build; rm -rf "$WORK"; mkdir -p "$WORK"; cd "$WORK"
 lb config --distribution trixie --architectures "$ARCH" \
@@ -40,7 +41,6 @@ fonts-noto-color-emoji
 spice-vdagent
 qemu-guest-agent
 L
-[ "$ARCH" = amd64 ] && echo virtualbox-guest-x11 > config/package-lists/vbox.list.chroot
 
 cat > $C/opt/chenos/index.html <<'CHENOS_INDEX_EOF'
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>ChenOS X 10.7</title><style>
