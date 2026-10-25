@@ -1,0 +1,44 @@
+name: Build GlassOS ISO
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    container:
+      image: debian:trixie
+      options: --privileged
+    timeout-minutes: 120
+    steps:
+      - name: Install base tools
+        run: |
+          apt-get update
+          apt-get install -y ca-certificates git sudo
+
+      - uses: actions/checkout@v4
+
+      - name: Build ISO
+        run: |
+          chmod +x build-glassos.sh
+          ./build-glassos.sh
+
+      - name: Collect ISO
+        run: |
+          mkdir -p out
+          cp /root/glassos-*.iso out/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: glassos-${{ matrix.arch }}-iso
+          path: out/*.iso
+          retention-days: 7
+          compression-level: 0
